@@ -77,7 +77,10 @@ if (args.cmd === "scan") {
 } else {
   if (args.olderHours == null) fail("clean requires --older-than (e.g. --older-than 30d) as a safety rail");
   if (!rows.length) { console.log("diskhog: nothing to clean."); process.exit(0); }
-  if (args.apply) await fs.promises.mkdir(args.quarantine, { recursive: true });
+  if (args.apply) {
+    try { await fs.promises.mkdir(args.quarantine, { recursive: true }); }
+    catch (e) { fail("cannot create quarantine dir " + args.quarantine + " (" + (e && e.message) + ") - pick a writable one with --quarantine DIR"); }
+  }
   for (const h of rows) {
     const stamp = path.basename(h.project) + "-" + h.target.name + "-" + Date.now();
     const dest = path.join(args.quarantine, stamp);

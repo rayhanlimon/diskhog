@@ -71,3 +71,10 @@ test("unknown option exits 2", async () => {
   const r = await run(BIN, ["--bogus"]);
   assert.equal(r.code, 2);
 });
+test("unwritable quarantine exits 2 with helpful message", async () => {
+  const root = await mkRoot();
+  const r = await run(BIN, ["clean", root, "--older-than", "0h", "--apply", "--quarantine", "/sys/nope-dh", "--min", "1B"]);
+  assert.equal(r.code, 2);
+  assert.match(r.errText, /quarantine/);
+  assert.ok(fs.existsSync(path.join(root, "proj", "node_modules")));
+});
